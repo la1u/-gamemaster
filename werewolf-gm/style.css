@@ -1,0 +1,309 @@
+/* ======================== */
+/* 共通リセット・変数       */
+/* ======================== */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --bg-dark:#0a0e1a;
+  --bg-night:#0f1528;
+  --bg-day:#1a1205;
+  --surface:#161b2e;
+  --surface-glass:rgba(255,255,255,.06);
+  --surface-glass-hover:rgba(255,255,255,.12);
+  --border:rgba(255,255,255,.08);
+  --text:#e8e6e3;
+  --text-dim:rgba(255,255,255,.5);
+  --accent-night:#6c5ce7;
+  --accent-night-glow:rgba(108,92,231,.35);
+  --accent-day:#f0a500;
+  --accent-day-glow:rgba(240,165,0,.3);
+  --danger:#e74c3c;
+  --wolf:#c0392b;
+  --village:#2ecc71;
+  --seer:#9b59b6;
+  --medium:#3498db;
+  --hunter:#e67e22;
+  --radius:14px;
+  --radius-sm:8px;
+}
+
+html{font-size:16px;scroll-behavior:smooth}
+body{
+  font-family:'Noto Sans JP','Outfit',sans-serif;
+  background:var(--bg-dark);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  transition:background .8s ease;
+}
+body.night{background:linear-gradient(160deg,#0a0e1a 0%,#1a1040 50%,#0d1b2a 100%)}
+body.day{background:linear-gradient(160deg,#1a1205 0%,#2a1f0a 50%,#1a1608 100%)}
+
+/* ======================== */
+/* 画面切り替え             */
+/* ======================== */
+.screen{display:none;opacity:0;transition:opacity .5s ease}
+.screen.active{display:flex;opacity:1}
+
+/* ======================== */
+/* セットアップ画面         */
+/* ======================== */
+#setup-screen{
+  min-height:100vh;
+  justify-content:center;
+  align-items:center;
+  background:linear-gradient(160deg,#0a0e1a 0%,#1a1040 50%,#0d1b2a 100%);
+}
+
+.setup-container{
+  width:min(600px,90vw);
+  display:flex;flex-direction:column;align-items:center;
+  gap:28px;padding:40px 20px;
+}
+
+.setup-error{
+  width:100%;padding:14px 16px;
+  background:rgba(231,76,60,.15);border:1px solid var(--danger);
+  border-radius:var(--radius-sm);color:#ff7675;
+  font-size:.9rem;font-weight:600;text-align:center;
+  animation:fadeInDown .3s ease;
+}
+
+.logo-area{text-align:center}
+.logo-icon{font-size:4rem;display:block;margin-bottom:12px;animation:float 3s ease-in-out infinite}
+.logo-area h1{
+  font-family:'Outfit','Noto Sans JP',sans-serif;
+  font-size:2.2rem;font-weight:800;
+  background:linear-gradient(135deg,#6c5ce7,#a29bfe);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.subtitle{color:var(--text-dim);margin-top:6px;font-size:.95rem}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+.role-summary{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.role-badge{
+  padding:6px 14px;border-radius:20px;font-size:.82rem;font-weight:600;
+  backdrop-filter:blur(10px);border:1px solid var(--border);
+}
+.role-badge.villager{background:rgba(46,204,113,.15);color:#2ecc71}
+.role-badge.werewolf{background:rgba(192,57,43,.15);color:#e74c3c}
+.role-badge.seer{background:rgba(155,89,182,.15);color:#9b59b6}
+.role-badge.medium{background:rgba(52,152,219,.15);color:#3498db}
+.role-badge.hunter{background:rgba(230,126,34,.15);color:#e67e22}
+
+.player-inputs{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.player-input-wrap{display:flex;gap:8px;position:relative}
+.player-input-wrap input{
+  flex:1;padding:14px;
+  background:var(--surface-glass);border:1px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--text);font-size:.95rem;font-family:inherit;outline:none;
+  transition:border-color .3s,box-shadow .3s;
+}
+.player-input-wrap input::placeholder{color:var(--text-dim);font-size:.85rem}
+.player-input-wrap input:focus{border-color:var(--accent-night);box-shadow:0 0 0 3px var(--accent-night-glow)}
+
+.role-select{
+  width:110px;padding:14px 10px; flex-shrink:0;
+  background:var(--surface-glass);border:1px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--text);font-size:.85rem;font-family:inherit;outline:none;
+  cursor:pointer; transition:border-color .3s;
+}
+.role-select:focus{border-color:var(--accent-night)}
+.role-select option{background:var(--surface);color:var(--text)}
+
+/* ======================== */
+/* ボタン                   */
+/* ======================== */
+.btn-primary{
+  padding:14px 36px;
+  background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:#fff;
+  border:none;border-radius:var(--radius);
+  font-size:1.05rem;font-weight:700;font-family:inherit;cursor:pointer;
+  display:inline-flex;align-items:center;gap:8px;
+  transition:transform .2s,box-shadow .3s;
+  box-shadow:0 4px 20px var(--accent-night-glow);
+}
+.btn-primary:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 8px 30px var(--accent-night-glow)}
+.btn-primary:active{transform:scale(.97)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+.btn-secondary{
+  padding:12px 28px;background:var(--surface-glass);color:var(--text);
+  border:1px solid var(--border);border-radius:var(--radius);
+  font-size:.95rem;font-weight:600;font-family:inherit;cursor:pointer;
+  transition:background .2s;
+}
+.btn-secondary:hover{background:var(--surface-glass-hover)}
+
+.btn-danger{
+  padding:10px 20px;background:rgba(231,76,60,.12);color:var(--danger);
+  border:1px solid rgba(231,76,60,.25);border-radius:var(--radius-sm);
+  font-size:.85rem;font-weight:600;font-family:inherit;cursor:pointer;width:100%;
+  transition:background .2s;
+}
+.btn-danger:hover{background:rgba(231,76,60,.25)}
+.btn-icon{font-size:1.2em}
+
+/* ======================== */
+/* ゲーム進行画面           */
+/* ======================== */
+#game-screen{min-height:100vh;flex-direction:column;position:relative}
+
+.win-conditions{
+  position:fixed;bottom:12px;right:12px;
+  background:var(--surface-glass);backdrop-filter:blur(10px);
+  border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:8px 14px;font-size:.72rem;color:var(--text-dim);z-index:100;line-height:1.6;
+}
+
+.game-layout{display:flex;flex:1;min-height:100vh}
+
+.main-panel{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  padding:40px 30px 30px;gap:24px;
+}
+
+.phase-header{text-align:center;animation:fadeInDown .5s ease}
+.phase-icon{font-size:3rem;display:block;margin-bottom:8px}
+#phase-title{font-size:1.8rem;font-weight:800}
+.phase-sub{font-size:.9rem;color:var(--text-dim);margin-top:4px;display:block}
+
+.script-card{
+  width:min(600px,100%);
+  background:var(--surface-glass);backdrop-filter:blur(16px);
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:32px 28px;min-height:120px;
+  display:flex;align-items:center;justify-content:center;
+  animation:fadeIn .4s ease;
+}
+.script-text{font-size:1.15rem;line-height:2;text-align:center;white-space:pre-line}
+.script-text .highlight{color:var(--accent-night);font-weight:700}
+.script-text .warn{color:var(--danger);font-size:.85rem}
+.script-text .result-white{color:#6c5ce7;font-weight:700;font-size:1.3rem}
+.script-text .result-black{color:#e74c3c;font-weight:700;font-size:1.3rem}
+
+.nav-buttons{display:flex;gap:16px;margin-top:auto;padding-bottom:20px}
+
+/* ======================== */
+/* タイマー                 */
+/* ======================== */
+.timer-area{
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+}
+.timer-display{
+  font-family:'Outfit',monospace;font-size:3.5rem;font-weight:800;
+  color:var(--text);letter-spacing:.05em;
+  text-shadow:0 0 20px rgba(108,92,231,.3);
+  transition:color .3s;
+}
+.timer-display.warning{color:#f39c12;text-shadow:0 0 20px rgba(243,156,18,.4)}
+.timer-display.danger{color:#e74c3c;text-shadow:0 0 20px rgba(231,76,60,.4);animation:pulse 1s ease-in-out infinite}
+.timer-buttons{display:flex;gap:10px}
+.btn-timer{
+  padding:8px 20px;
+  background:var(--surface-glass);border:1px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--text);font-size:.85rem;font-weight:600;font-family:inherit;cursor:pointer;
+  transition:background .2s,border-color .2s;
+}
+.btn-timer:hover{background:var(--surface-glass-hover);border-color:var(--accent-night)}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* ======================== */
+/* アクションエリア         */
+/* ======================== */
+.action-area{width:min(600px,100%);text-align:center}
+.action-area h3{font-size:1rem;color:var(--text-dim);margin-bottom:14px}
+.player-select-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.player-select-btn{
+  padding:10px 22px;background:var(--surface-glass);
+  border:2px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--text);font-size:.95rem;font-family:inherit;cursor:pointer;
+  transition:all .2s;
+}
+.player-select-btn:hover{border-color:var(--accent-night);background:rgba(108,92,231,.15)}
+.player-select-btn.selected{border-color:var(--accent-night);background:rgba(108,92,231,.25);box-shadow:0 0 12px var(--accent-night-glow)}
+.player-select-btn.disabled{opacity:.3;pointer-events:none}
+
+/* ======================== */
+/* サイドパネル             */
+/* ======================== */
+.side-panel{
+  width:280px;background:rgba(0,0,0,.3);backdrop-filter:blur(10px);
+  border-left:1px solid var(--border);padding:24px 16px;
+  display:flex;flex-direction:column;gap:20px;overflow-y:auto;
+  max-height:100vh;position:sticky;top:0;
+}
+.panel-section h3{font-size:.85rem;color:var(--text-dim);margin-bottom:10px;letter-spacing:.05em}
+.player-list{display:flex;flex-direction:column;gap:6px}
+.player-item{
+  display:flex;align-items:center;gap:10px;padding:8px 12px;
+  background:var(--surface-glass);border-radius:var(--radius-sm);font-size:.88rem;
+}
+.player-item .dot{width:8px;height:8px;border-radius:50%;background:var(--village);flex-shrink:0}
+.player-item .role-tag{margin-left:auto;font-size:.72rem;padding:2px 8px;border-radius:10px;font-weight:600}
+.role-tag.villager-tag{background:rgba(46,204,113,.15);color:#2ecc71}
+.role-tag.werewolf-tag{background:rgba(192,57,43,.15);color:#e74c3c}
+.role-tag.seer-tag{background:rgba(155,89,182,.15);color:#9b59b6}
+.role-tag.medium-tag{background:rgba(52,152,219,.15);color:#3498db}
+.role-tag.hunter-tag{background:rgba(230,126,34,.15);color:#e67e22}
+
+.dead-list{display:flex;flex-direction:column;gap:6px}
+.dead-item{
+  display:flex;align-items:center;gap:10px;padding:8px 12px;
+  background:rgba(231,76,60,.08);border-radius:var(--radius-sm);
+  font-size:.85rem;color:rgba(255,255,255,.5);text-decoration:line-through;
+}
+.dead-item .cause{margin-left:auto;font-size:.7rem;color:rgba(255,255,255,.35)}
+.empty-msg{font-size:.82rem;color:var(--text-dim);font-style:italic}
+
+.status-counts{display:flex;gap:10px}
+.count-item{flex:1;text-align:center;background:var(--surface-glass);border-radius:var(--radius-sm);padding:10px 6px}
+.count-label{display:block;font-size:.7rem;color:var(--text-dim);margin-bottom:4px}
+.count-val{display:block;font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif}
+
+/* ======================== */
+/* 結果画面                 */
+/* ======================== */
+#result-screen{
+  min-height:100vh;justify-content:center;align-items:center;
+  background:linear-gradient(160deg,#0a0e1a 0%,#1a1040 50%,#0d1b2a 100%);
+}
+.result-container{
+  text-align:center;display:flex;flex-direction:column;align-items:center;
+  gap:20px;padding:40px;animation:fadeInUp .6s ease;
+}
+.result-icon{font-size:5rem;animation:float 3s ease-in-out infinite}
+.result-container h1{font-size:2.4rem;font-weight:900}
+#result-desc{color:var(--text-dim);font-size:1rem}
+.result-roles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+.result-role-card{
+  background:var(--surface-glass);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:12px 10px;text-align:center;
+}
+.result-role-card .rname{font-size:.85rem;margin-bottom:4px}
+.result-role-card .rrole{font-size:.75rem;font-weight:700}
+
+/* ======================== */
+/* アニメーション           */
+/* ======================== */
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+
+/* ======================== */
+/* レスポンシブ             */
+/* ======================== */
+@media(max-width:768px){
+  .game-layout{flex-direction:column}
+  .side-panel{width:100%;border-left:none;border-top:1px solid var(--border);max-height:none;position:static;padding:20px 16px}
+  .player-inputs{grid-template-columns:1fr;gap:16px}
+  .result-roles{grid-template-columns:repeat(2,1fr)}
+  .main-panel{padding:24px 16px 16px}
+  .logo-area h1{font-size:1.6rem}
+  .timer-display{font-size:2.8rem}
+  .script-card{padding:24px 16px;min-height:100px}
+  .script-text{font-size:1.05rem}
+  .nav-buttons{width:100%;justify-content:space-between;gap:12px}
+  .btn-primary, .btn-secondary{flex:1;justify-content:center;padding:14px 16px}
+}
