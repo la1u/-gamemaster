@@ -56,9 +56,9 @@ body.day{background:linear-gradient(160deg,#1a1205 0%,#2a1f0a 50%,#1a1608 100%)}
 }
 
 .setup-container{
-  width:min(600px,90vw);
+  width:92%;max-width:600px;
   display:flex;flex-direction:column;align-items:center;
-  gap:28px;padding:40px 20px;
+  gap:24px;padding:32px 16px;
 }
 
 .setup-error{
@@ -153,7 +153,7 @@ body.day{background:linear-gradient(160deg,#1a1205 0%,#2a1f0a 50%,#1a1608 100%)}
   position:fixed;bottom:12px;right:12px;
   background:var(--surface-glass);backdrop-filter:blur(10px);
   border:1px solid var(--border);border-radius:var(--radius-sm);
-  padding:8px 14px;font-size:.72rem;color:var(--text-dim);z-index:100;line-height:1.6;
+  padding:8px 14px;font-size:.72rem;color:var(--text-dim);z-index:10;line-height:1.6;
 }
 
 .game-layout{display:flex;flex:1;min-height:100vh}
@@ -169,7 +169,7 @@ body.day{background:linear-gradient(160deg,#1a1205 0%,#2a1f0a 50%,#1a1608 100%)}
 .phase-sub{font-size:.9rem;color:var(--text-dim);margin-top:4px;display:block}
 
 .script-card{
-  width:min(600px,100%);
+  width:100%;max-width:600px;
   background:var(--surface-glass);backdrop-filter:blur(16px);
   border:1px solid var(--border);border-radius:var(--radius);
   padding:32px 28px;min-height:120px;
@@ -212,7 +212,7 @@ body.day{background:linear-gradient(160deg,#1a1205 0%,#2a1f0a 50%,#1a1608 100%)}
 /* ======================== */
 /* アクションエリア         */
 /* ======================== */
-.action-area{width:min(600px,100%);text-align:center}
+.action-area{width:100%;max-width:600px;text-align:center}
 .action-area h3{font-size:1rem;color:var(--text-dim);margin-bottom:14px}
 .player-select-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
 .player-select-btn{
@@ -295,15 +295,28 @@ body.day{background:linear-gradient(160deg,#1a1205 0%,#2a1f0a 50%,#1a1608 100%)}
 /* レスポンシブ             */
 /* ======================== */
 @media(max-width:768px){
+  body, html { width:100%; overflow-x:hidden; }
   .game-layout{flex-direction:column}
-  .side-panel{width:100%;border-left:none;border-top:1px solid var(--border);max-height:none;position:static;padding:20px 16px}
+  
+  /* スマホの右下固定表示をやめてサイドパネルの末尾に配置 */
+  .win-conditions{
+    position:relative; bottom:auto; right:auto;
+    width:100%; margin-top:12px; text-align:center;
+  }
+  
+  .side-panel{width:100%;border-left:none;border-top:1px solid var(--border);max-height:none;position:static;padding:24px 16px}
   .player-inputs{grid-template-columns:1fr;gap:16px}
+  .player-input-wrap input{padding:12px;font-size:1rem}
+  .role-select{width:35%;padding:12px 6px;font-size:.85rem}
+  
   .result-roles{grid-template-columns:repeat(2,1fr)}
-  .main-panel{padding:24px 16px 16px}
+  .main-panel{padding:20px 16px;gap:20px}
   .logo-area h1{font-size:1.6rem}
   .timer-display{font-size:2.8rem}
-  .script-card{padding:24px 16px;min-height:100px}
+  .script-card{padding:20px 16px;min-height:100px}
   .script-text{font-size:1.05rem}
-  .nav-buttons{width:100%;justify-content:space-between;gap:12px}
-  .btn-primary, .btn-secondary{flex:1;justify-content:center;padding:14px 16px}
+  
+  .nav-buttons{width:100%;max-width:600px;justify-content:space-between;gap:12px;margin-top:auto}
+  .btn-primary, .btn-secondary{flex:1;justify-content:center;padding:14px 16px;font-size:1rem}
+  .btn-timer{padding:8px 16px;font-size:1rem}
 }
