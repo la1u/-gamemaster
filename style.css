@@ -306,8 +306,9 @@ body.day{background:linear-gradient(160deg,#1a1205 0%,#2a1f0a 50%,#1a1608 100%)}
   
   .side-panel{width:100%;border-left:none;border-top:1px solid var(--border);max-height:none;position:static;padding:24px 16px}
   .player-inputs{grid-template-columns:1fr;gap:16px}
-  .player-input-wrap input{padding:12px;font-size:1rem}
-  .role-select{width:35%;padding:12px 6px;font-size:.85rem}
+  .player-input-wrap{display:flex;flex-direction:row;width:100%}
+  .player-input-wrap input{flex:1;min-width:0;padding:12px;font-size:1rem}
+  .role-select{width:110px;flex-shrink:0;padding:12px 6px;font-size:.85rem}
   
   .result-roles{grid-template-columns:repeat(2,1fr)}
   .main-panel{padding:20px 16px;gap:20px}
