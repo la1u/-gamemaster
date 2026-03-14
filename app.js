@@ -42,6 +42,7 @@ let nightGuardTarget = null;
 let lastExecuted = null;
 let randomWhiteTarget = null;
 let isStarting = false;
+let seerLog = [];
 
 // ===== タイマー =====
 let timerInterval = null;
@@ -98,6 +99,21 @@ function getSeer() { return players.find(p => p.role === ROLES.SEER); }
 function getHunter() { return players.find(p => p.role === ROLES.HUNTER); }
 function getMedium() { return players.find(p => p.role === ROLES.MEDIUM); }
 function getWolves() { return players.filter(p => p.role === ROLES.WEREWOLF); }
+
+function renderSeerLog() {
+  const container = document.getElementById('seer-log');
+  if (seerLog.length === 0) {
+    container.innerHTML = '<p class="empty-msg">まだ占い結果はありません</p>';
+    return;
+  }
+  container.innerHTML = seerLog.map(entry => `
+    <div class="log-item">
+      <span class="log-day">${entry.day}日目</span>
+      <span class="log-name">${entry.name}</span>
+      <span class="log-result ${entry.isWolf ? 'black' : 'white'}">${entry.isWolf ? '黒' : '白'}</span>
+    </div>
+  `).join('');
+}
 
 // ===== ゲーム開始 =====
 function startGame() {
@@ -177,6 +193,10 @@ function startGame() {
     lastExecuted = null;
     nightKillTarget = null;
     nightGuardTarget = null;
+    seerLog = [];
+
+    // 初日ランダム白をログに追加
+    seerLog.push({ day: 1, name: randomWhiteTarget.name, isWolf: false });
 
     switchScreen('game-screen');
     document.body.classList.add('night');
@@ -598,6 +618,16 @@ function selectTarget(action, playerId) {
       } else {
         currentSteps.splice(stepIndex + 1, 0, resultStep);
       }
+      
+      // ログに追加（重複防止：同じステップで再選択した場合を考慮）
+      const logIndex = seerLog.findIndex(l => l.day === day && l._stepIdx === stepIndex);
+      const logEntry = { day, name: target.name, isWolf, _stepIdx: stepIndex };
+      if (logIndex >= 0) {
+        seerLog[logIndex] = logEntry;
+      } else {
+        seerLog.push(logEntry);
+      }
+      renderSeerLog();
       break;
     }
     case 'VOTE': {
@@ -829,6 +859,8 @@ function renderSidePanel() {
   document.getElementById('alive-count').textContent = getAlive().length;
   document.getElementById('village-count').textContent = getAliveVillagers().length;
   document.getElementById('wolf-count').textContent = getAliveWolves().length;
+
+  renderSeerLog();
 }
 
 // ===== リセット =====
@@ -846,7 +878,9 @@ function resetGame() {
   lastExecuted = null;
   nightKillTarget = null;
   nightGuardTarget = null;
+  seerLog = [];
   hideTimer();
   document.body.classList.remove('night', 'day');
   switchScreen('setup-screen');
+  renderSeerLog();
 }

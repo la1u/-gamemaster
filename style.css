@@ -265,6 +265,18 @@ body.day{background:linear-gradient(160deg,#1a1205 0%,#2a1f0a 50%,#1a1608 100%)}
 .count-label{display:block;font-size:.7rem;color:var(--text-dim);margin-bottom:4px}
 .count-val{display:block;font-size:1.3rem;font-weight:800;font-family:'Outfit',sans-serif}
 
+/* 占いログ */
+.seer-log{display:flex;flex-direction:column;gap:8px}
+.log-item{
+  display:flex;align-items:center;gap:10px;padding:8px 12px;
+  background:var(--surface-glass);border-radius:var(--radius-sm);font-size:.85rem;
+}
+.log-day{font-weight:700;color:var(--text-dim);font-size:.75rem;min-width:40px}
+.log-name{flex:1}
+.log-result{padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:700}
+.log-result.white{background:rgba(108,92,231,.15);color:#a29bfe}
+.log-result.black{background:rgba(231,76,60,.15);color:#ff7675}
+
 /* ======================== */
 /* 結果画面                 */
 /* ======================== */
