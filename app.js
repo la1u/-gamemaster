@@ -156,11 +156,14 @@ function updateRoleHint() {
 
 function renderPlayerInputs() {
   const container = document.getElementById('player-inputs');
-  // 既存の名前を保存
+  // 既存の名前と役職を保存
   const existingNames = [];
+  const existingRoles = [];
   for (let i = 0; i < container.children.length; i++) {
     const input = container.children[i].querySelector('input');
+    const select = container.children[i].querySelector('select');
     if (input) existingNames.push(input.value);
+    if (select) existingRoles.push(select.value);
   }
   
   container.innerHTML = '';
@@ -173,13 +176,18 @@ function renderPlayerInputs() {
     const optionsHTML = roleOptions.map(r => `<option value="${r}">${r}</option>`).join('');
     
     wrap.innerHTML = `
-      <input type="text" id="pname-${i}" placeholder="プレイヤー${i + 1} の名前" maxlength="12" value="${existingNames[i] || ''}" />
+      <input type="text" id="pname-${i}" placeholder="プレイヤー${i + 1} の名前" maxlength="12" />
       <select id="prole-${i}" class="role-select">
         <option value="ランダム">ランダム</option>
         ${optionsHTML}
       </select>
     `;
+    
     container.appendChild(wrap);
+    
+    // HTMLの崩れ（クォーテーション等）を防ぐため、JSプロパティで直接値を復元
+    if (existingNames[i]) wrap.querySelector('input').value = existingNames[i];
+    if (existingRoles[i]) wrap.querySelector('select').value = existingRoles[i];
   }
 }
 
@@ -493,8 +501,8 @@ function buildNightPhase() {
     }
 
     // ② 狩人
-    const hunter = getHunter();
-    if (hunter && hunter.alive) {
+    const hunters = players.filter(p => p.role === ROLES.HUNTER && p.alive);
+    if (hunters.length > 0) {
       currentSteps.push({
         text: '狩人は目を開けてください。\n守る人を指差してください。\n<span class="warn">※同じ人を連続護衛できません</span>',
         action: 'GUARD'
@@ -503,8 +511,8 @@ function buildNightPhase() {
     }
 
     // ③ 占い師
-    const seer = getSeer();
-    if (seer && seer.alive) {
+    const seers = players.filter(p => p.role === ROLES.SEER && p.alive);
+    if (seers.length > 0) {
       currentSteps.push({
         text: '占い師は目を開けてください。\n占う人を指差してください。',
         action: 'SEER'
@@ -513,8 +521,8 @@ function buildNightPhase() {
     }
 
     // ④ 霊能者
-    const medium = getMedium();
-    if (medium && medium.alive && lastExecuted) {
+    const mediums = players.filter(p => p.role === ROLES.MEDIUM && p.alive);
+    if (mediums.length > 0 && lastExecuted !== null) {
       const exTarget = getPlayerById(lastExecuted);
       if (exTarget) {
         const isWolf = exTarget.role === ROLES.WEREWOLF;
@@ -522,7 +530,7 @@ function buildNightPhase() {
         const resultText = isWolf ? '黒' : '白';
         currentSteps.push({
           text: '霊能者は目を開けてください。',
-          note: `（霊能者: ${medium.name}）`
+          note: `（霊能者: ${mediums.map(m => m.name).join('、')}）`
         });
         currentSteps.push({
           text: `処刑された <span class="${resultClass}">${exTarget.name} ＝ ${resultText}</span>\n\n確認したら目を閉じてください。`
