@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=2" />
+  <link rel="stylesheet" href="style.css?v=8" />
 </head>
 <body>
 
@@ -21,16 +21,28 @@
         <p class="subtitle">ゲームマスターの進行をスムーズに</p>
       </div>
 
-      <div class="role-summary">
-        <span class="role-badge villager">村人 ×3</span>
-        <span class="role-badge werewolf">人狼 ×2</span>
-        <span class="role-badge seer">占い師 ×1</span>
-        <span class="role-badge medium">霊能者 ×1</span>
-        <span class="role-badge hunter">狩人 ×1</span>
+      <!-- プレイヤー数選択 -->
+      <div class="config-section">
+        <label class="config-label" for="player-count">👥 プレイヤー数</label>
+        <div class="player-count-selector" id="player-count-selector">
+          <button class="count-btn" onclick="changePlayerCount(-1)">−</button>
+          <span class="count-display" id="player-count-display">8</span>
+          <button class="count-btn" onclick="changePlayerCount(1)">＋</button>
+        </div>
+      </div>
+
+      <!-- 役職人数設定 -->
+      <div class="config-section">
+        <label class="config-label">🎭 役職の人数設定</label>
+        <div class="role-config" id="role-config">
+          <!-- JSで生成 -->
+        </div>
+        <p class="config-hint" id="role-count-hint">合計: 0 / 8</p>
+        <button class="btn-default" onclick="applyDefaults()">↺ デフォルトに戻す</button>
       </div>
 
       <div class="player-inputs" id="player-inputs">
-        <!-- JS で 8人分生成 -->
+        <!-- JS で動的生成 -->
       </div>
 
       <div id="setup-error" class="setup-error" style="display:none;"></div>
@@ -133,6 +145,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>

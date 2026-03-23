@@ -8,7 +8,8 @@ const ROLES = {
   WEREWOLF: '人狼',
   SEER:     '占い師',
   MEDIUM:   '霊能者',
-  HUNTER:   '狩人'
+  HUNTER:   '狩人',
+  MADMAN:   '狂人'
 };
 
 const ROLE_CSS = {
@@ -16,19 +17,33 @@ const ROLE_CSS = {
   [ROLES.WEREWOLF]: 'werewolf-tag',
   [ROLES.SEER]:     'seer-tag',
   [ROLES.MEDIUM]:   'medium-tag',
-  [ROLES.HUNTER]:   'hunter-tag'
+  [ROLES.HUNTER]:   'hunter-tag',
+  [ROLES.MADMAN]:   'madman-tag'
 };
 
-const ROLE_POOL = [
-  ROLES.VILLAGER, ROLES.VILLAGER, ROLES.VILLAGER,
-  ROLES.WEREWOLF, ROLES.WEREWOLF,
-  ROLES.SEER,
-  ROLES.MEDIUM,
-  ROLES.HUNTER
-];
+const ROLE_COLORS = {
+  [ROLES.VILLAGER]: { bg: 'rgba(46,204,113,.15)', color: '#2ecc71' },
+  [ROLES.WEREWOLF]: { bg: 'rgba(192,57,43,.15)',  color: '#e74c3c' },
+  [ROLES.SEER]:     { bg: 'rgba(155,89,182,.15)', color: '#9b59b6' },
+  [ROLES.MEDIUM]:   { bg: 'rgba(52,152,219,.15)', color: '#3498db' },
+  [ROLES.HUNTER]:   { bg: 'rgba(230,126,34,.15)', color: '#e67e22' },
+  [ROLES.MADMAN]:   { bg: 'rgba(241,196,15,.15)',  color: '#f1c40f' }
+};
 
-const NUM_PLAYERS = 8;
 const TIMER_MINUTES = 6;
+const MIN_PLAYERS = 4;
+const MAX_PLAYERS = 15;
+
+// ===== 役職設定状態 =====
+let numPlayers = 8;
+let roleCounts = {
+  [ROLES.VILLAGER]: 3,
+  [ROLES.WEREWOLF]: 2,
+  [ROLES.SEER]: 1,
+  [ROLES.MEDIUM]: 1,
+  [ROLES.HUNTER]: 1,
+  [ROLES.MADMAN]: 0
+};
 
 // ===== ゲーム状態 =====
 let players = [];
@@ -50,26 +65,123 @@ let timerSeconds = TIMER_MINUTES * 60;
 let timerRunning = false;
 
 // ===== 初期化 =====
-(function initSetup() {
+function initSetup() {
+  renderRoleConfig();
+  renderPlayerInputs();
+  updateRoleHint();
+  document.getElementById('btn-start').addEventListener('click', startGame);
+}
+
+function applyDefaults() {
+  numPlayers = 8;
+  document.getElementById('player-count-display').textContent = numPlayers;
+  roleCounts = {
+    [ROLES.VILLAGER]: 3,
+    [ROLES.WEREWOLF]: 2,
+    [ROLES.SEER]: 1,
+    [ROLES.MEDIUM]: 1,
+    [ROLES.HUNTER]: 1,
+    [ROLES.MADMAN]: 0
+  };
+  renderRoleConfig();
+  renderPlayerInputs();
+  updateRoleHint();
+}
+
+function changePlayerCount(delta) {
+  const newCount = numPlayers + delta;
+  if (newCount < MIN_PLAYERS || newCount > MAX_PLAYERS) return;
+  numPlayers = newCount;
+  document.getElementById('player-count-display').textContent = numPlayers;
+  
+  // 役職合計がプレイヤー数を超えたら村人を自動調整
+  const total = Object.values(roleCounts).reduce((s, v) => s + v, 0);
+  if (total > numPlayers) {
+    const diff = total - numPlayers;
+    roleCounts[ROLES.VILLAGER] = Math.max(0, roleCounts[ROLES.VILLAGER] - diff);
+    renderRoleConfig();
+  }
+  
+  renderPlayerInputs();
+  updateRoleHint();
+}
+
+function changeRoleCount(role, delta) {
+  const newVal = roleCounts[role] + delta;
+  if (newVal < 0) return;
+  
+  const total = Object.values(roleCounts).reduce((s, v) => s + v, 0) + delta;
+  if (total > numPlayers) return;
+  
+  roleCounts[role] = newVal;
+  renderRoleConfig();
+  updateRoleHint();
+}
+
+function renderRoleConfig() {
+  const container = document.getElementById('role-config');
+  const roleList = [ROLES.VILLAGER, ROLES.WEREWOLF, ROLES.SEER, ROLES.MEDIUM, ROLES.HUNTER, ROLES.MADMAN];
+  
+  container.innerHTML = roleList.map(role => {
+    const c = ROLE_COLORS[role];
+    return `
+      <div class="role-config-row" style="border-left:3px solid ${c.color}">
+        <span class="role-config-name" style="color:${c.color}">${role}</span>
+        <div class="role-config-controls">
+          <button class="count-btn" onclick="changeRoleCount('${role}', -1)">−</button>
+          <span class="role-config-val" id="rc-${role}">${roleCounts[role]}</span>
+          <button class="count-btn" onclick="changeRoleCount('${role}', 1)">＋</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateRoleHint() {
+  const total = Object.values(roleCounts).reduce((s, v) => s + v, 0);
+  const hint = document.getElementById('role-count-hint');
+  const remaining = numPlayers - total;
+  
+  if (remaining > 0) {
+    hint.textContent = `合計: ${total} / ${numPlayers}（残り ${remaining} 人はランダム配役）`;
+    hint.className = 'config-hint';
+  } else if (remaining === 0) {
+    hint.textContent = `合計: ${total} / ${numPlayers} ✓`;
+    hint.className = 'config-hint';
+  } else {
+    hint.textContent = `合計: ${total} / ${numPlayers}（${Math.abs(remaining)} 人超過！）`;
+    hint.className = 'config-hint error';
+  }
+}
+
+function renderPlayerInputs() {
   const container = document.getElementById('player-inputs');
-  for (let i = 0; i < NUM_PLAYERS; i++) {
+  // 既存の名前を保存
+  const existingNames = [];
+  for (let i = 0; i < container.children.length; i++) {
+    const input = container.children[i].querySelector('input');
+    if (input) existingNames.push(input.value);
+  }
+  
+  container.innerHTML = '';
+  for (let i = 0; i < numPlayers; i++) {
     const wrap = document.createElement('div');
     wrap.className = 'player-input-wrap';
+    
+    // 役職オプション
+    const roleOptions = [ROLES.VILLAGER, ROLES.WEREWOLF, ROLES.SEER, ROLES.MEDIUM, ROLES.HUNTER, ROLES.MADMAN];
+    const optionsHTML = roleOptions.map(r => `<option value="${r}">${r}</option>`).join('');
+    
     wrap.innerHTML = `
-      <input type="text" id="pname-${i}" placeholder="プレイヤー${i + 1} の名前" maxlength="12" />
+      <input type="text" id="pname-${i}" placeholder="プレイヤー${i + 1} の名前" maxlength="12" value="${existingNames[i] || ''}" />
       <select id="prole-${i}" class="role-select">
         <option value="ランダム">ランダム</option>
-        <option value="${ROLES.VILLAGER}">${ROLES.VILLAGER}</option>
-        <option value="${ROLES.WEREWOLF}">${ROLES.WEREWOLF}</option>
-        <option value="${ROLES.SEER}">${ROLES.SEER}</option>
-        <option value="${ROLES.MEDIUM}">${ROLES.MEDIUM}</option>
-        <option value="${ROLES.HUNTER}">${ROLES.HUNTER}</option>
+        ${optionsHTML}
       </select>
     `;
     container.appendChild(wrap);
   }
-  document.getElementById('btn-start').addEventListener('click', startGame);
-})();
+}
 
 // ===== ユーティリティ =====
 function showError(msg) {
@@ -124,17 +236,21 @@ function startGame() {
   try {
     const names = [];
     const manualRoles = [];
-    
-    // 設定されるべき役職の上限
-    const baseCounts = {
-      [ROLES.VILLAGER]: 3,
-      [ROLES.WEREWOLF]: 2,
-      [ROLES.SEER]: 1,
-      [ROLES.MEDIUM]: 1,
-      [ROLES.HUNTER]: 1
-    };
 
-    for (let i = 0; i < NUM_PLAYERS; i++) {
+    // 役職の合計チェック
+    const totalRoles = Object.values(roleCounts).reduce((s, v) => s + v, 0);
+    if (totalRoles > numPlayers) {
+      showError(`役職の合計（${totalRoles}）がプレイヤー数（${numPlayers}）を超えています。`);
+      return;
+    }
+
+    // 人狼が0人のチェック
+    if (roleCounts[ROLES.WEREWOLF] < 1) {
+      showError('人狼は最低1人必要です。');
+      return;
+    }
+
+    for (let i = 0; i < numPlayers; i++) {
       const input = document.getElementById(`pname-${i}`);
       const select = document.getElementById(`prole-${i}`);
       const val = input.value.trim();
@@ -153,38 +269,47 @@ function startGame() {
       manualRoles.push(roleVal);
     }
 
-    // 役職の数え上げとバリデーション
-    const currentCounts = { [ROLES.VILLAGER]: 0, [ROLES.WEREWOLF]: 0, [ROLES.SEER]: 0, [ROLES.MEDIUM]: 0, [ROLES.HUNTER]: 0 };
+    // 手動指定のバリデーション
+    const manualCounts = { [ROLES.VILLAGER]: 0, [ROLES.WEREWOLF]: 0, [ROLES.SEER]: 0, [ROLES.MEDIUM]: 0, [ROLES.HUNTER]: 0, [ROLES.MADMAN]: 0 };
     for (const r of manualRoles) {
-      if (r !== 'ランダム') currentCounts[r]++;
+      if (r !== 'ランダム') manualCounts[r]++;
     }
 
-    for (const r in baseCounts) {
-      if (currentCounts[r] > baseCounts[r]) {
-        showError(`役職「${r}」の指定数が多すぎます。\n上限（${baseCounts[r]}名）を超えないように設定してください。`);
+    for (const r in roleCounts) {
+      if (manualCounts[r] > roleCounts[r]) {
+        showError(`役職「${r}」の個別指定数（${manualCounts[r]}）が設定数（${roleCounts[r]}）を超えています。`);
         return;
       }
     }
 
     // ランダム枠に割り当てる役職のリストを準備
     const remainingRoles = [];
-    for (const r in baseCounts) {
-      const remainingCount = baseCounts[r] - currentCounts[r];
+    for (const r in roleCounts) {
+      const remainingCount = roleCounts[r] - manualCounts[r];
       for (let i = 0; i < remainingCount; i++) remainingRoles.push(r);
     }
+    // 役職未割当の余り人数分は村人を追加
+    const unassigned = numPlayers - totalRoles;
+    // ランダム選択のうち、上の remainingRoles 以外のスロットは「余り分」→ 村人として追加
+    const randomSlots = manualRoles.filter(r => r === 'ランダム').length;
+    const extraVillagers = randomSlots - remainingRoles.length;
+    for (let i = 0; i < extraVillagers; i++) remainingRoles.push(ROLES.VILLAGER);
+    
     const shuffledRemaining = shuffle(remainingRoles);
 
     // プレイヤーへの割り当て
     players = names.map((name, i) => {
       let finalRole = manualRoles[i];
       if (finalRole === 'ランダム') {
-        finalRole = shuffledRemaining.pop();
+        finalRole = shuffledRemaining.pop() || ROLES.VILLAGER;
       }
       return { id: i, name, role: finalRole, alive: true, causeOfDeath: null };
     });
 
     const villageSide = players.filter(p => p.role !== ROLES.WEREWOLF && p.role !== ROLES.SEER);
-    randomWhiteTarget = villageSide[Math.floor(Math.random() * villageSide.length)];
+    randomWhiteTarget = villageSide.length > 0 
+      ? villageSide[Math.floor(Math.random() * villageSide.length)]
+      : players.find(p => p.role !== ROLES.WEREWOLF);
 
     day = 1;
     phase = 'night';
@@ -195,8 +320,10 @@ function startGame() {
     nightGuardTarget = null;
     seerLog = [];
 
-    // 初日ランダム白をログに追加
-    seerLog.push({ day: 1, name: randomWhiteTarget.name, isWolf: false });
+    // 初日ランダム白をログに追加（占い師がいる場合のみ）
+    if (getSeer() && randomWhiteTarget) {
+      seerLog.push({ day: 1, name: randomWhiteTarget.name, isWolf: false, _stepIdx: -1 });
+    }
 
     switchScreen('game-screen');
     document.body.classList.add('night');
@@ -290,38 +417,61 @@ function buildNightPhase() {
 
     // ① 人狼
     const wolves = getWolves();
-    const wolfNames = wolves.map(w => w.name).join('、');
-    currentSteps.push({
-      text: '人狼は目を開けてください。\nお互いを確認してください。',
-      note: `（人狼: ${wolfNames}）`
-    });
-    currentSteps.push({ text: '目を閉じてください。' });
+    if (wolves.length > 0) {
+      const wolfNames = wolves.map(w => w.name).join('、');
+      currentSteps.push({
+        text: '人狼は目を開けてください。\nお互いを確認してください。',
+        note: `（人狼: ${wolfNames}）`
+      });
+      currentSteps.push({ text: '目を閉じてください。' });
+    }
 
     // ② 占い師
-    const seer = getSeer();
-    currentSteps.push({
-      text: '占い師は目を開けてください。',
-      note: `（占い師: ${seer ? seer.name : '—'}）`
-    });
-    currentSteps.push({
-      text: `<span class="result-white">${randomWhiteTarget.name} ＝ 白</span>\n<span class="warn">（初日ランダム白）</span>\n\n確認したら目を閉じてください。`
-    });
+    const seers = players.filter(p => p.role === ROLES.SEER);
+    if (seers.length > 0) {
+      currentSteps.push({
+        text: '占い師は目を開けてください。',
+        note: `（占い師: ${seers.map(s => s.name).join('、')}）`
+      });
+      if (randomWhiteTarget) {
+        currentSteps.push({
+          text: `<span class="result-white">${randomWhiteTarget.name} ＝ 白</span>\n<span class="warn">（初日ランダム白）</span>\n\n確認したら目を閉じてください。`
+        });
+      } else {
+        currentSteps.push({ text: '目を閉じてください。' });
+      }
+    }
 
     // ③ 狩人
-    const hunter = getHunter();
-    currentSteps.push({
-      text: '狩人は目を開けてください。',
-      note: `（狩人: ${hunter ? hunter.name : '—'}）`
-    });
-    currentSteps.push({ text: '目を閉じてください。' });
+    const hunters = players.filter(p => p.role === ROLES.HUNTER);
+    if (hunters.length > 0) {
+      currentSteps.push({
+        text: '狩人は目を開けてください。',
+        note: `（狩人: ${hunters.map(h => h.name).join('、')}）`
+      });
+      currentSteps.push({ text: '目を閉じてください。' });
+    }
 
     // ④ 霊能者
-    const medium = getMedium();
-    currentSteps.push({
-      text: '霊能者は目を開けてください。',
-      note: `（霊能者: ${medium ? medium.name : '—'}）`
-    });
-    currentSteps.push({ text: '目を閉じてください。' });
+    const mediums = players.filter(p => p.role === ROLES.MEDIUM);
+    if (mediums.length > 0) {
+      currentSteps.push({
+        text: '霊能者は目を開けてください。',
+        note: `（霊能者: ${mediums.map(m => m.name).join('、')}）`
+      });
+      currentSteps.push({ text: '目を閉じてください。' });
+    }
+
+    // ⑤ 狂人
+    const madmen = players.filter(p => p.role === ROLES.MADMAN);
+    if (madmen.length > 0) {
+      const madmanNames = madmen.map(m => m.name).join('、');
+      currentSteps.push({
+        text: '狂人は目を開けてください。',
+        note: `（狂人: ${madmanNames}）`
+      });
+      currentSteps.push({ text: '目を閉じてください。' });
+    }
 
     // → 昼へ
     currentSteps.push({
@@ -403,7 +553,7 @@ function buildDayPhase() {
     });
   } else {
     // 朝の死亡発表
-    if (nightKillTarget && nightKillTarget !== '__guarded__') {
+    if (nightKillTarget !== null && nightKillTarget !== '__guarded__') {
       const p = getPlayerById(nightKillTarget);
       currentSteps.push({
         text: `朝になりました。\n全員、目を開けてください。\n\n昨夜、死亡した人は<span class="highlight">${p.name}</span>さんです。`
@@ -818,6 +968,7 @@ function getRoleColor(role) {
     case ROLES.SEER: return '#9b59b6';
     case ROLES.MEDIUM: return '#3498db';
     case ROLES.HUNTER: return '#e67e22';
+    case ROLES.MADMAN: return '#f1c40f';
     default: return '#2ecc71';
   }
 }
@@ -882,5 +1033,11 @@ function resetGame() {
   hideTimer();
   document.body.classList.remove('night', 'day');
   switchScreen('setup-screen');
+  renderPlayerInputs();
+  renderRoleConfig();
+  updateRoleHint();
   renderSeerLog();
 }
+
+// ===== 起動 =====
+initSetup();

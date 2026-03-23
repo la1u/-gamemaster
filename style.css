@@ -90,6 +90,47 @@ body.day{background:linear-gradient(160deg,#1a1205 0%,#2a1f0a 50%,#1a1608 100%)}
 .role-badge.seer{background:rgba(155,89,182,.15);color:#9b59b6}
 .role-badge.medium{background:rgba(52,152,219,.15);color:#3498db}
 .role-badge.hunter{background:rgba(230,126,34,.15);color:#e67e22}
+.role-badge.madman{background:rgba(241,196,15,.15);color:#f1c40f}
+
+/* 設定セクション */
+.config-section{width:100%;text-align:center}
+.config-label{display:block;font-size:.95rem;font-weight:700;margin-bottom:10px;color:var(--text)}
+
+.player-count-selector{
+  display:inline-flex;align-items:center;gap:16px;
+  background:var(--surface-glass);border:1px solid var(--border);
+  border-radius:var(--radius);padding:8px 20px;
+}
+.count-btn{
+  width:36px;height:36px;border-radius:50%;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);font-size:1.2rem;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .2s,transform .1s;font-family:inherit;
+}
+.count-btn:hover{background:var(--accent-night);transform:scale(1.1)}
+.count-btn:active{transform:scale(.95)}
+.count-display{font-size:1.8rem;font-weight:800;font-family:'Outfit',sans-serif;min-width:40px}
+
+.role-config{display:flex;flex-direction:column;gap:8px;width:100%}
+.role-config-row{
+  display:flex;align-items:center;gap:10px;
+  background:var(--surface-glass);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:8px 14px;
+}
+.role-config-name{flex:1;text-align:left;font-size:.9rem;font-weight:600}
+.role-config-controls{display:flex;align-items:center;gap:10px}
+.role-config-controls .count-btn{width:28px;height:28px;font-size:.9rem}
+.role-config-val{font-size:1.1rem;font-weight:700;min-width:24px;text-align:center;font-family:'Outfit',sans-serif}
+.config-hint{margin-top:8px;font-size:.8rem;color:var(--text-dim)}
+.config-hint.error{color:#e74c3c;font-weight:700}
+
+.btn-default{
+  margin-top:8px;padding:8px 20px;
+  background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--text-dim);font-size:.8rem;font-family:inherit;cursor:pointer;
+  transition:background .2s,color .2s;
+}
+.btn-default:hover{background:var(--surface);color:var(--text)}
 
 .player-inputs{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .player-input-wrap{display:flex;gap:8px;position:relative}
@@ -250,6 +291,7 @@ body.day{background:linear-gradient(160deg,#1a1205 0%,#2a1f0a 50%,#1a1608 100%)}
 .role-tag.seer-tag{background:rgba(155,89,182,.15);color:#9b59b6}
 .role-tag.medium-tag{background:rgba(52,152,219,.15);color:#3498db}
 .role-tag.hunter-tag{background:rgba(230,126,34,.15);color:#e67e22}
+.role-tag.madman-tag{background:rgba(241,196,15,.15);color:#f1c40f}
 
 .dead-list{display:flex;flex-direction:column;gap:6px}
 .dead-item{
